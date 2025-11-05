@@ -1,11 +1,11 @@
 # Install dependencies:
-pip install -r requirements.txt
+    - pip install -r requirements.txt
 
 # Training the model
-python -m datatraining.results.model train --dataset "datatraining/dataset" --model-path "datatraining/results/trained_model.joblib"
+    - python -m datatraining.results.model train --dataset "datatraining/dataset" --model-path "datatraining/results/trained_model.joblib"
 
 # Start the app:
-python -m backend.app
+    - python -m backend.app
 
 # For analysis
     - python model_analysis.py --model trained_model.joblib
