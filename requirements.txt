@@ -1,0 +1,6 @@
+Flask>=2.0
+Pillow
+numpy
+scikit-learn
+scikit-image
+joblib

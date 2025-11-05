@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smart Trash Sorter</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Smart Trash Sorter</h1>
+
+      <form id="upload-form">
+        <label class="file-input">
+          <input type="file" name="image" id="image" accept="image/*" />
+          <span>Select an image</span>
+        </label>
+
+        <button type="submit" class="btn">Upload & Predict</button>
+      </form>
+
+      <section id="result" class="result hidden">
+        <h2>Prediction</h2>
+        <div id="prediction-text"></div>
+        <img id="preview" alt="preview" />
+      </section>
+    </main>
+
+    <script>
+      const form = document.getElementById("upload-form");
+      const result = document.getElementById("result");
+      const predText = document.getElementById("prediction-text");
+      const preview = document.getElementById("preview");
+      const input = document.getElementById("image");
+
+      let pastedFile = null;
+
+      // Show preview helper
+      function showPreview(file) {
+        const objectUrl = URL.createObjectURL(file);
+        preview.src = objectUrl;
+        result.classList.remove("hidden");
+        predText.textContent = "Ready — preview shown. Click Upload & Predict.";
+      }
+
+      // File selected manually
+      input.addEventListener("change", () => {
+        if (!input.files || input.files.length === 0) {
+          result.classList.add("hidden");
+          preview.src = "";
+          predText.textContent = "";
+          return;
+        }
+        pastedFile = null;
+        const file = input.files[0];
+        showPreview(file);
+      });
+
+      // Listen globally for pasted images
+      document.addEventListener("paste", (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (const item of items) {
+          if (item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+            pastedFile = file;
+            showPreview(file);
+            break;
+          }
+        }
+      });
+
+      // Handle upload + predict
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const file = pastedFile || (input.files && input.files[0]);
+        if (!file) {
+          alert("Please select or paste an image first");
+          return;
+        }
+
+        predText.textContent = "Predicting...";
+        const fd = new FormData();
+        fd.append("image", file);
+
+        try {
+          const res = await fetch("/api/predict", { method: "POST", body: fd });
+          const json = await res.json();
+          if (res.ok) {
+            console.log("Prediction result:", json);
+            if (json.predictions && json.predictions.length > 0) {
+              const p = json.predictions[0];
+              predText.textContent = `${p.label} this item`;
+            } else {
+              predText.textContent = "No prediction returned";
+            }
+          } else {
+            predText.textContent = `Error: ${json.error || "unknown"}`;
+          }
+        } catch (err) {
+          predText.textContent = "Network error";
+        }
+      });
+    </script>
+  </body>
+</html>
