@@ -83,7 +83,7 @@ def _build_sample_result_from_payload(model_obj: TrashModel, predictions: List[D
     return result
 
 def create_app(test_config: Optional[Dict[str, Any]] = None) -> Flask:
-    template_folder = str(BASEDIR.parent / "frontend" / "templates")
+    template_folder = str(BASEDIR.parent / "frontend")
     static_folder = str(BASEDIR.parent / "frontend" / "static")
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
     app.config.from_mapping(MODEL_PATH=str(BASEDIR.parent / "datatraining" / "results" / "trained_model.joblib"))
